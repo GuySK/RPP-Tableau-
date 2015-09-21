@@ -1,0 +1,233 @@
+---
+title: "Ranking de Clientes - Testing"
+author: "GSK"
+date: "Thursday, September 17, 2015"
+output: html_document
+---
+
+#### Set up
+
+Input data tables are:
+
+```{r echo = F, results='markup'}
+
+# Params
+CODE_DIR       = 'C:/Users/AAB330/Google Drive 2/Business Cases/Rosental/BI/StockBroker_code' 
+DATA_DIR       = '../StockBrokerData'
+DATA_ORIGIN    = '../StockBroker_rar'
+ROBJECTS       = 'DataFiles.RData'
+
+# Set up
+setwd(CODE_DIR)
+source('EDA_ETL_AuxFuncts.R')
+load(ROBJECTS, verbose = T)
+
+``` 
+
+#### Parameters: Period and number of customers
+Note that these parameters applies to all tests except for AuM Ranking.
+
+```{r echo = F, results ='markup', collapse = TRUE}
+
+(FromDate =  '01-01-2002')     # Change Start date here
+(ToDate   =  '31-12-2015')     # Change End date here
+(N        =   15)              # Change nr of customers in ranking here
+
+FromDate <- as.Date(x = FromDate, format = '%d-%m-%Y')
+ToDate   <- as.Date(x = ToDate, format = '%d-%m-%Y')
+
+```
+
+
+#### Test Comisiones x Boletos
+
+```{r echo = T, results = 'markup'}
+
+# Filters
+Oper <- OPER[OPER$OperFecAnul == '1753-01-01', ]
+Oper <- Oper[Oper$OperComiCMonto != 0, ]
+
+# Join tables OPER and PERSONAS
+Oper <- Oper[Oper$OperFecCon >= FromDate & Oper$OperFecCon <= ToDate, ]
+Comi <- merge(Oper, PERSONAS, by = 'ComiCodigo')
+Comi <- Comi[, c('ComiCodigo', 'OperFecCon', 'OperComiCMonto', 
+                 'PersTitular', 'PersApellido', 'PersNumeroDoc', 'PersPorPar')]
+
+# Compute each person's total comission 
+Comi$Monto <- Comi$OperComiCMonto * (Comi$PersPorPar / 100)  
+ComiPers <- aggregate(x = Comi$Monto,
+                      by = list(PersApellido = Comi$PersApellido, 
+                                PersNumeroDoc = Comi$PersNumeroDoc),
+                      sum)
+names(ComiPers)[3] <- 'Monto'
+
+# Create accumulator to compute Total comissions
+TotPers <- ComiPers 
+
+# plot Ranking
+plot_TopN(ComiPers, N, 'Comisiones por Boletos')
+
+```
+
+
+#### Test Comisiones x Dividendos
+
+```{r echo=T, results='markup'}
+
+# Filters
+
+Divra4 <- DIVRA4[DIVRA4$TiCdId == 4, ]
+Divra4 <- Divra4[Divra4$DivComMonto > 0, ]
+
+# Join tables DIVRA and DIVRA4 to get date
+Divra44 <- merge(Divra4, DIVRA, by = 'DRAID')
+Divra44 <- Divra44[, c(names(Divra4), 'DRAFecPos')]
+Divra44 <- Divra44[Divra44$DRAFecPos >= FromDate & Divra44$DRAFecPos <= ToDate, ]
+
+# Join tables DIVRA44 and PERSONAS to get Personal data
+Comi <- merge(Divra44, PERSONAS, by = 'ComiCodigo')
+Comi <- Comi[, c(names(Divra44), 'PersTitular', 'PersApellido', 
+                 'PersNumeroDoc', 'PersPorPar')]
+
+# Compute each person's total comission 
+Comi$Monto <- Comi$DivComMonto * (Comi$PersPorPar / 100)  
+ComiPers <- aggregate(x = Comi$Monto,
+                      by = list(PersApellido = Comi$PersApellido, 
+                                PersNumeroDoc = Comi$PersNumeroDoc),
+                      sum)
+names(ComiPers)[3] <- 'Monto'
+
+# add to accumulator
+TotPers <- rbind(TotPers, ComiPers)
+TotPers <- aggregate(x = TotPers$Monto,  
+                     by = list(PersApellido  = TotPers$PersApellido, 
+                               PersNumeroDoc = TotPers$PersNumeroDoc), 
+                     sum)
+names(TotPers)[3] <- c('Monto')
+
+# plot Ranking
+plot_TopN(ComiPers, N, 'Comisiones por Dividendos')
+
+```
+
+
+#### Test Comisiones x Mant de Cta 
+
+```{r echo=T, results='markup'}
+
+# Filters
+CtaCte <- CUENTACORRIENTE[CUENTACORRIENTE$CompId == 5, ]
+
+# Join tables CtaCte and PERSONAS to get Personal data
+CtaCte <- CtaCte[CtaCte$CuCoFecConcertacion >= FromDate & 
+                     CtaCte$CuCoFecConcertacion <= ToDate, ]
+Comi <- merge(CtaCte, PERSONAS, by = 'ComiCodigo')
+Comi <- Comi[, c(names(CtaCte), 'PersTitular', 'PersApellido', 
+                 'PersNumeroDoc', 'PersPorPar')]
+
+# Compute each person's total comission 
+Comi$Monto <- Comi$CuCoImporte * (Comi$PersPorPar / 100)  
+ComiPers <- aggregate(x = Comi$Monto,
+                      by = list(PersApellido = Comi$PersApellido, 
+                                PersNumeroDoc = Comi$PersNumeroDoc),
+                      sum)
+names(ComiPers)[3] <- 'Monto'
+
+# add to accumulator
+TotPers <- rbind(TotPers, ComiPers)
+TotPers <- aggregate(x = TotPers$Monto,  
+                     by = list(PersApellido  = TotPers$PersApellido, 
+                               PersNumeroDoc = TotPers$PersNumeroDoc), 
+                     sum)
+names(TotPers)[3] <- c('Monto')
+
+# plot Ranking
+plot_TopN(ComiPers, N, 'Comisiones por Mant. Cta.')
+
+```
+
+
+#### Test Comisiones x ND y NC 
+
+```{r echo=T, results='markup'}
+
+# Filters
+CompMov <- COMPMOV[COMPMOV$CompId == 18 | COMPMOV$CompId == 19, ]
+CompMov <- CompMov[CompMov$CompFecAnul == '1753-01-01', ]
+
+# Join tables CompMov and PERSONAS to get Personal data
+CompMov <- CompMov[CompMov$CompFecha >= FromDate & CompMov$CompFecha <= ToDate,]
+Comi <- merge(CompMov, PERSONAS, by = 'ComiCodigo')
+Comi <- Comi[, c('ComiCodigo', 'CompId','CompFecha','CompImporte', 'PersTitular', 'PersApellido', 
+                 'PersNumeroDoc', 'PersPorPar')]
+
+# Reverse sign of NCs
+Comi[Comi$CompId == 19, 'CompImporte'] <- Comi[Comi$CompId == 19, 'CompImporte'] * (-1)
+
+# Compute each person's total comission 
+Comi$Monto <- Comi$CompImporte * (Comi$PersPorPar / 100)  
+ComiPers <- aggregate(x = Comi$Monto,
+                      by = list(PersApellido = Comi$PersApellido, 
+                                PersNumeroDoc = Comi$PersNumeroDoc),
+                      sum)
+names(ComiPers)[3] <- 'Monto'
+
+# add to accumulator
+TotPers <- rbind(TotPers, ComiPers)
+TotPers <- aggregate(x = TotPers$Monto,  
+                     by = list(PersApellido  = TotPers$PersApellido, 
+                               PersNumeroDoc = TotPers$PersNumeroDoc), 
+                     sum)
+names(TotPers)[3] <- c('Monto')
+
+# plot Ranking
+plot_TopN(ComiPers, N, 'Comisiones por ND y NC')
+          
+```
+
+#### Total Ingresos por Comisiones
+
+```{r echo = T, results = 'markup'}
+plot_TopN(TotPers, 15, 'Total de Ingresos por Comisiones')
+```
+
+#### Test Ranking de AuM  
+
+##### AuM Parameters: Period and number of customers
+
+```{r echo = F, results ='hold'}
+
+(FromDate =  '01-01-2015')     # Change Start date here
+(ToDate   =  '31-12-2015')     # Change End date here
+(N        =   15)              # Change nr of customers in ranking here
+
+FromDate <- as.Date(x = FromDate, format = '%d-%m-%Y')
+ToDate   <- as.Date(x = ToDate, format = '%d-%m-%Y')
+
+```
+
+##### AuM Ranking Computation
+
+```{r echo=T, results='markup'}
+
+# Filters
+Operico <- OPERICO[OPERICO$ICoFecha >= FromDate & OPERICO$ICoFecha <= ToDate,]
+
+# Join tables Operico and PERSONAS to get Personal data
+Posi <- merge(Operico, PERSONAS, by = 'ComiCodigo')
+Posi <- Posi[, c(names(Operico)[1:3], 'PersTitular', 'PersApellido', 
+                 'PersNumeroDoc', 'PersPorPar')]
+
+# Compute each person's net posicion 
+Posi$Monto <- Posi$ICoPosGlb * (Posi$PersPorPar / 100)  
+PosiPers <- aggregate(x = Posi$Monto,
+                      by = list(PersApellido = Posi$PersApellido, 
+                                PersNumeroDoc = Posi$PersNumeroDoc),
+                      sum)
+names(PosiPers)[3] <- 'Monto'
+
+# plot Ranking
+plot_TopN(PosiPers, N, 'Assets under Management')
+          
+```
+
