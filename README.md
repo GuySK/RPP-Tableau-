@@ -5,12 +5,12 @@ R Pilot Project Tableau
 
 | File | Description |
 | ---  | ---         |
-| README.md | This file. |
-| stockbroker_eda1R|EDA for the project|       
-| stockbroker_ETLR| ETL file for exported SQL Server tables|
-| createAPNOMSR| Source file to create meaningful names|
-| EDA_ETL_AuxFunctsR| Auxiliary R functions written for ETL |
-| Testing_AllRmd| Testing R script Checks Tableau workbook results|
-| DataFilesRData| csv files in R format Input to Testing_AllRmd |
-| SB_Ranking_Pers3_1twb| Tableau workbook| 
+| SB_Ranking_Pers3_1.twb | Tableau workbook| 
+| Testing_All.pdf | Testing run in pdf format| 
+| stockbroker_ETL.R | ETL file for exported SQL Server tables|
+| createAPNOMS.R | Source file to create meaningful names|
+| EDA_ETL_AuxFuncts.R | Auxiliary R functions written for ETL |
+| Testing_All.Rmd | Testing R script. Checks Tableau workbook results|
+| DataFiles.RData | csv files in R format Input to Testing_All.Rmd |
+| stockbroker_eda1.R |EDA for the project|       
 
