@@ -40,9 +40,12 @@ Las tablas utilizadas en el proyecto fueron:
 
 Para la confección del tablero en base a las tablas exportadas en formato csv hubo que realizar las siguientes operaciones de transformación de datos.
 
+1. Eliminación de las últimas 4 lineas de todos los archivos  (generado por la exportación)
+1. Fill automático de registros con nro de separadores incorrectos (varios casos, múltiples archivos)
 1. Transfromación de fechas a formato POSIX
-1. Cambio del formato de punto decimal
+1. Cambio del formato de punto decimal (de '.' a ',') (depende de la configuración local desktop)
 1. Re-creación del campo PersApellido de la tabla PERSONAS para facilitar la inteligibilidad de las pruebas.
+
 
 
 ### Reglas de negocio
