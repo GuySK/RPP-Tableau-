@@ -6,7 +6,7 @@ R Pilot Project Tableau
 | File | Description |
 | ---  | ---         |
 | SB_Ranking_Pers3_1.twb | Tableau workbook| 
-| Ranking_de_Clientes-DocTecnica.pdf | Documentación técnica |
+| Ranking_Clientes-DocTec.pdf | Documentación técnica |
 | Testing_All.pdf | Testing run in pdf format| 
 | stockbroker_ETL.R | ETL file for exported SQL Server tables|
 | createAPNOMS.R | Source file to create meaningful names|
