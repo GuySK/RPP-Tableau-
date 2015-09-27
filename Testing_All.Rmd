@@ -2,7 +2,7 @@
 title: "Ranking de Clientes - Testing"
 author: "GSK"
 date: "Thursday, September 17, 2015"
-output: html_document
+output: pdf_document
 ---
 
 #### Set up
@@ -25,6 +25,7 @@ load(ROBJECTS, verbose = T)
 ``` 
 
 #### Parameters: Period and number of customers
+
 Note that these parameters applies to all tests except for AuM Ranking.
 
 ```{r echo = F, results ='markup', collapse = TRUE}
@@ -38,8 +39,7 @@ ToDate   <- as.Date(x = ToDate, format = '%d-%m-%Y')
 
 ```
 
-
-#### Test Comisiones x Boletos
+#### Test Comisiones x Boletos 
 
 ```{r echo = T, results = 'markup'}
 
@@ -63,7 +63,9 @@ names(ComiPers)[3] <- 'Monto'
 
 # Create accumulator to compute Total comissions
 TotPers <- ComiPers 
+```
 
+```{r echo = T, fig.align='center'}
 # plot Ranking
 plot_TopN(ComiPers, N, 'Comisiones por Boletos')
 
@@ -104,7 +106,9 @@ TotPers <- aggregate(x = TotPers$Monto,
                                PersNumeroDoc = TotPers$PersNumeroDoc), 
                      sum)
 names(TotPers)[3] <- c('Monto')
+```
 
+```{r echo = T, fig.align='center'}
 # plot Ranking
 plot_TopN(ComiPers, N, 'Comisiones por Dividendos')
 
@@ -140,6 +144,9 @@ TotPers <- aggregate(x = TotPers$Monto,
                                PersNumeroDoc = TotPers$PersNumeroDoc), 
                      sum)
 names(TotPers)[3] <- c('Monto')
+```
+
+```{r echo = T, fig.align='center'}
 
 # plot Ranking
 plot_TopN(ComiPers, N, 'Comisiones por Mant. Cta.')
@@ -179,6 +186,9 @@ TotPers <- aggregate(x = TotPers$Monto,
                                PersNumeroDoc = TotPers$PersNumeroDoc), 
                      sum)
 names(TotPers)[3] <- c('Monto')
+```
+
+```{r echo = T, fig.align='center'}
 
 # plot Ranking
 plot_TopN(ComiPers, N, 'Comisiones por ND y NC')
@@ -187,7 +197,7 @@ plot_TopN(ComiPers, N, 'Comisiones por ND y NC')
 
 #### Total Ingresos por Comisiones
 
-```{r echo = T, results = 'markup'}
+```{r echo = T, fig.align = 'center'}
 plot_TopN(TotPers, 15, 'Total de Ingresos por Comisiones')
 ```
 
@@ -225,6 +235,9 @@ PosiPers <- aggregate(x = Posi$Monto,
                                 PersNumeroDoc = Posi$PersNumeroDoc),
                       sum)
 names(PosiPers)[3] <- 'Monto'
+```
+
+```{r echo = T, fig.align='center'}
 
 # plot Ranking
 plot_TopN(PosiPers, N, 'Assets under Management')
